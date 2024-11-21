@@ -6,7 +6,7 @@
   "pipeline_parallel_size": 16,
   "global_batch_size": 2048,
   "micro_batch_size": 1,
-  "num_layers": 24,
+  "num_layers": 32,
   "hidden_size": 4096,
   "num_attention_heads": 16,
   "max_length": 2048,
