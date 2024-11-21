@@ -17,6 +17,7 @@ def main(args):
     pred_iter_time = max(result.values())/1000/1000
     
     logger.info(f"predicted iteration time: {pred_iter_time:.3f} ms")
+    sim.show_graph()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
