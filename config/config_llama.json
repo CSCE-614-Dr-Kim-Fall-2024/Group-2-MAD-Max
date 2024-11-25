@@ -1,5 +1,5 @@
 {
-  "num_gpus": 4096,
+  "num_gpus": 2048,
   "gpu_name": "A100",
   "tensor_parallel_size": 8,
   "data_parallel_size": 32,
@@ -15,6 +15,6 @@
   "pipeline_scheduling": "1f1b",
   "inter_node_bandwidth": 409.6,
   "intra_node_bandwidth": 614.4,
-  "node_size": 16,
+  "node_size": 256,
   "trace_path": "trace/"
 }
