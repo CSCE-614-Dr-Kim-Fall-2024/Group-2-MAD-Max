@@ -233,9 +233,9 @@ class DepGraph():
         plt.tight_layout()
         plt.subplots_adjust(left=0, bottom=0, right=1, top=1)
 
-        # Save the graph as an image file in the same folder
-        file_path = os.path.join(os.getcwd(), "graph_output.png")
-        plt.savefig(file_path, bbox_inches='tight')
-        print(f"Graph saved to {file_path}")
+        # # Save the graph as an image file in the same folder
+        # file_path = os.path.join(os.getcwd(), "graph_output.png")
+        # plt.savefig(file_path, bbox_inches='tight')
+        # print(f"Graph saved to {file_path}")
 
         plt.show()
