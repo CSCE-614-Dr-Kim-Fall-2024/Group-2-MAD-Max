@@ -23,9 +23,9 @@ base_variants = [
 config_variants = []
 for variant in base_variants:
     config_variants.extend([
-        f"{variant}_8_8_32",
-        f"{variant}_4_128_4",
-        f"{variant}_32_8_8"
+        f"{variant}_16_8_16",
+        f"{variant}_16_16_8",
+        f"{variant}_8_16_16"
     ])
 
 def process_configs(config_dir, results_dir, folder_name):
@@ -73,6 +73,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Define folders and process them
-    folders = {"llama-parallel": "config/llama-parallel"}
+    folders = {"llama-parallel-16": "config/llama-parallel-16"}
     for folder_name, config_dir in folders.items():
         process_configs(config_dir, args.results_dir, folder_name)
