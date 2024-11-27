@@ -3,7 +3,7 @@
   "gpu_name": "A100",
   "tensor_parallel_size": 8,
   "data_parallel_size": 32,
-  "pipeline_parallel_size": 16,
+  "pipeline_parallel_size": 8,
   "global_batch_size": 2048,
   "micro_batch_size": 1,
   "num_layers": 16,
