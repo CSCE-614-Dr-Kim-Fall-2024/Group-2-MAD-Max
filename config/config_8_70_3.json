@@ -1,0 +1,20 @@
+{
+    "gpu_name": "A100", 
+    "use_gradient_bucket": false, 
+    "num_attention_heads": 96, 
+    "num_gpus": 1680, 
+    "trace_path": "trace/", 
+    "use_checkpoint": true, 
+    "tensor_parallel_size": 8, 
+    "micro_batch_size": 2, 
+    "pipeline_scheduling": "1f1b", 
+    "global_batch_size": 3360, 
+    "intra_node_bandwidth": 150, 
+    "node_size": 8, 
+    "max_length": 2048, 
+    "num_layers": 96, 
+    "data_parallel_size": 70, 
+    "hidden_size": 12288, 
+    "pipeline_parallel_size": 3, 
+    "inter_node_bandwidth": 800
+}

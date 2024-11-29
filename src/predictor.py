@@ -99,11 +99,11 @@ class vTrain():
         return result, breakdown
     
 
-    def show_graph(self):
+    def show_graph(self, filename):
         if self.graph is None:
             logger.error(f"there is no simulated execution graph")
         else:
-            self.graph.show_graph()
+            self.graph.show_graph(filename)
 
 
     def create_model(self):
