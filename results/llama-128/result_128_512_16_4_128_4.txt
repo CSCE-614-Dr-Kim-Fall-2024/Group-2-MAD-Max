@@ -1,0 +1,7 @@
+Predicted iteration time: 1869.465 ms
+Breakdown:
+Comm: {'compute': 0.0, 'comm': 458952825.0079436}
+GPU0: {'compute': 612334704.0, 'comm': 0.0}
+GPU1: {'compute': 605921280.0, 'comm': 0.0}
+GPU2: {'compute': 605921280.0, 'comm': 0.0}
+GPU3: {'compute': 492920416.0, 'comm': 0.0}
