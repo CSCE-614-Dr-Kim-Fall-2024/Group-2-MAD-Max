@@ -1,93 +1,72 @@
-# vTrain: A Simulation Framework for Evaluating Cost-effective and Compute-optimal Large Language Model Training
+# CSCE-614 Term Project: Mad-Max
 
-vTrain is a profiling-driven simulator designed to provide AI practitioners a fast yet accurate software framework to determine an efficient and cost-effective LLM training system configuration.
+This project is inspired by the MAD-Max paper and focuses on design space exploration to enhance the performance of machine learning models through advanced parallelization strategies. Using the VTrain simulator, we implement intra-node parallelization with Tensor Parallelism (TP) and inter-node parallelization with Fully Sharded Data Parallelism (FSDP).Additionally, modifications are applied to the Transformer, Embedding, and Hidden Layers to optimize the architecture. Various parallelization strategies, including tensor, data, and pipeline parallelism, are explored to determine their effectiveness. The project evaluates model performance across various configurations and analyzes the impact of modifying parameters in the configuration file on the performance of Mad-Max.
 
-For more details about this work, please refer to [our paper](https://arxiv.org/abs/2312.12391) published in MICRO`24.
 
-## Setup
 
-### Using Docker
+## Project Hierarchy
 
-```
-# Build Dockerfile (it can take tens of minutes)
-cd ${VTRAIN_PATH}/docker
-docker build -t [TAG] .
+The project directory is organized as follows:
 
-# Create docker container from the image
-cd ..
-docker run -it --name vtrain --gpus all -v ./:/workspace/vTrain [TAG] /bin/bash
-```
+- **apex/**: Contains Apex library files for mixed precision training and optimizations. (Optional)
+- **config/**: Includes configuration files for various models with different layer numbers (e.g., 96 and 128), as well as modifications for tensor, data, and pipeline parallelism.
+- **data/**: Contains measured datpoints for validation of vTrain
+- **docker/**: Contains Dockerfile for creating reproducible environments for the simulator.
+- **profiler/**: Holds vTrain profiler to collect all CUDA traces between init_trace() and finish_trace().
+- **src/**: Includes Python scripts for running the configurations and models, producing graphs, and etc.
+- **trace/**: Contains trace files generated during simulation runs for further analysis.
 
-In the docker container, install dependencies:
-```
-# Install vTrain profiling module
-cd /workspace/vTrain/profiler
-pip install -r requirements.txt
-python setup.py install
+Additional files include:
+- **example.py**: A script showcasing how to execute the configurations.
+- **process_configs.py** and **process_configs_parallel.py**: Scripts to handle configuration files and execute parallelization strategies.
+- **requirements.txt**: Specifies the dependencies needed to run the project.
 
-# Install required modules for vTrain
-cd ..
-pip install -r requirements.txt
-```
+# Setup
 
-## Example
+To set up and run the project, follow these steps:
 
-### Prediction of single-iteration time
+1. Clone this repository
+   ```bash
+    git clone "https://github.com/CSCE-614-Dr-Kim-Fall-2024/Group2_Mad-max.git"
+   ```
 
-To run vTrain simulation, you need to write a simulation configuration file.
-- The example configuration is given in `config` directory, which is for simulating MT-NLG 530B training with (8, 12, 35)-way 3D parallelism using 3,360 A100 GPUs.
-- For more details about the configuration parameters, please refer to the docstring of `vTrainConfig` class.
+2. [Download](https://drive.google.com/file/d/1NXe5qG41la2uFVsxbTyP714fnfeSyE1l/view?usp=drive_link) the `.sif` file and upload it along with the vTrain project files to the HPRC (High-Performance Research Computing environment).
 
-Then, load the configuration file as follows:
-```
-from src.predictor import vTrain
-from src.config import vTrainConfig
+3. Initiate a compute node:
+   ```bash
+   srun --nodes=1 --ntasks-per-node=4 --mem=30G --gpus=1 --time=01:00:00 --pty bash -i
+   ```
 
-config = vTrainConfig.load_from_file("/path/to/your/CONFIG.json")
-```
+4. Set the temporary cache directory:
+   ```bash
+   cd $SCRATCH
+   export SINGULARITY_CACHEDIR=$TMPDIR/.singularity
+   module load WebProxy
+   ```
 
-Finally, instantiate a simulation object with the configuration and run the simulation by calling it:
+5. Navigate to the folder where `vtrain.sif` exists, and run the following command:
+   ```bash
+   singularity exec --nv --bind $(pwd):/workspace/vTrain2 vtrain.sif /bin/bash
+   ```
 
-```
-sim = vTrain(config)
-result, breakdown = sim()
-predicted_iter_time = max(result.values())
-```
+6. Run the code using this command:
+   ```bash
+   python example.py -c config/<config_file>.json
+   ```
 
-`breakdown` contains the latency breakdown into compute and communication time for each device.
+Replace `<config_file>` with the desired configuration file name to test different setups.
 
-The full example script can be found in `example.py`.
 
-### Visualization of execution graph
 
-After running the simulation, you can visualize the simulated execution graph:
+# Group Members 
 
-```
-sim.show_graph()
-```
+David	Hung  
+Terencio	Martinez  
+Sarah	Sotelo  
+Sharan	Sekhar
 
-## Reproducing validation results
-
-Validation results can be simply reproduced by running vTrain as:
-
-```
-# single-node configuration example
-python example.py -c config/validation/single/config_val_single_0818.json
-
-# multi-node configuration example
-python example.py -c config/validation/multi/config_val_175B_8_4_16_6.json
-```
-
-All simulation configurations used for validation can be found in `config/validation`.
-
-## Acknowledgment
-
-This research is funded by the generous support from the following organizations:
-- National Research Foundation of Korea (NRF) grant funded by the Korea government (MSIT) (NRF-2021R1A2C2091753)
-- Institute of Information & Communications Technology Planning & Evaluation(IITP) grant funded by the Korea government(MSIT) (No.RS-2024-00438851, (SW Starlab) High-performance Privacy-preserving Machine Learning System and System Software), (No.RS-2024-00402898, Simulation-based High-speed/High-Accuracy Data Center Workload/System Analysis Platform), and (No.RS-2024-00395134, DPU-Centric Datacenter Architecture for Next-Generation AI Devices)
-- Samsung Advanced Institute of Technology (SAIT)
-- Samsung Electronics Co., Ltd
-
-## Citation
-
-Jehyeon Bang, Yujeong Choi, Myeongwoo Kim, Yongdeok Kim, and Minsoo Rhu, "[vTrain: A Simulation Framework for Evaluating Cost-effective and Compute-optimal Large Language Model Training](https://arxiv.org/abs/2312.12391)," The 57th IEEE/ACM International Symposium on Microarchitecture (MICRO-57), Austin, TX, Nov. 2024
+# References
+Research Paper -  MAD-Max Beyond Single-Node: Enabling Large Machine Learning Model Acceleration on Distributed Systems  
+Research Paper - vTrain: A Simulation Framework for Evaluating Cost-effective and Compute-optimal Large Language Model Training  
+[vTrain Github](https://github.com/VIA-Research/vTrain.git)  
+[Nvidia Apex](https://github.com/NVIDIA/apex.git)
