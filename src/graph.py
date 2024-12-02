@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
 import os
+import json
 import logging
 
 logger = logging.getLogger()
-
+# logger.setLevel(logging.INFO)
 
 class Node():
     def __init__(self):
@@ -120,6 +121,8 @@ class TaskNode(Node):
         return f"{self.name}"
 
 
+
+
 class DepGraph():
     '''
         doc-string
@@ -161,6 +164,26 @@ class DepGraph():
     '''
         helper functions for debugging
     '''
+    def find_overlap(timeline):
+        overlap_duration = 0
+        for stream1, data1 in timeline.items():
+            for stream2, data2 in timeline.items():
+                if stream1 != stream2:
+                    for comm_start, comm_duration in data1["comm"]:
+                        for comp_start, comp_duration in data2["comp"]:
+                            overlap_start = max(comm_start, comp_start)
+                            overlap_end = min(comm_start + comm_duration, comp_start + comp_duration)
+                            if overlap_end > overlap_start:
+                                overlap_duration += overlap_end - overlap_start
+        txt_file_path = os.path.join(os.getcwd(), "overlap_duration.txt")
+        with open(txt_file_path, 'w') as txt_file:
+            txt_file.write(f"Total overlap duration: {total_overlap} units")
+        
+        print(f"Overlap duration written to {txt_file_path}")
+    # return overlap_duration
+
+
+
     def print_graph(self):
         for stream in self.streams.keys():
             if len(self.streams[stream]) == 0:
@@ -194,7 +217,8 @@ class DepGraph():
         print ("")
 
     
-    def show_graph(self):
+
+    def show_graph(self, plot_file, overlap_file):
         timeline = {}
         for stream, tasks in self.streams.items():
             if stream == "Comm":
@@ -208,6 +232,7 @@ class DepGraph():
                 if stage == "allreduce":
                     stage = "comm"
                 timeline[stream][stage].append((u.start, u.duration))
+
 
         plt.close('all')
         px = 1/plt.rcParams['figure.dpi']
@@ -232,10 +257,88 @@ class DepGraph():
         ax.set_ylim((0, 1+5*num_stream))
         plt.tight_layout()
         plt.subplots_adjust(left=0, bottom=0, right=1, top=1)
+        # variant_name = filename[filename.rindex('/')+1:]
+        # plt.savefig("%s/%s_plot.png"%(filename,variant_name))
+        plt.savefig(plot_file)
 
         # # Save the graph as an image file in the same folder
         # file_path = os.path.join(os.getcwd(), "graph_output.png")
         # plt.savefig(file_path, bbox_inches='tight')
         # print(f"Graph saved to {file_path}")
+        # cwd = os.getcwd()
+        # plt.show()
+        # plt.savefig("%s/results/%s_streamplot.png"%(cwd,filename))
 
-        plt.show()
+        
+        # Save timeline to JSON file with simplified structure
+        # json_file_path = os.path.join(os.getcwd(), "timeline_data.json")
+        # with open(json_file_path, 'w') as json_file:
+            # Convert tuples to lists for JSON serialization
+        serializable_timeline = {}
+        for stream, stages in timeline.items():
+            serializable_timeline[stream] = {
+                "comp": [],
+                "comm": timeline[stream]["comm"]
+            }
+            # Combine fwd, bwd, wu into comp for JSON
+            for stage in ["fwd", "bwd", "wu"]:
+                serializable_timeline[stream]["comp"].extend(
+                    [list(event) for event in timeline[stream][stage]]
+                )
+        
+            # json.dump(serializable_timeline, json_file, indent=4)
+
+        overlap_duration = 0
+        streams = list(serializable_timeline.keys())
+    
+        for i in range(len(streams) - 1):
+            current_stream = streams[i]
+            next_stream = streams[i + 1]
+            
+            # Compare current stream's comm with next stream's comp
+            for comm_start, comm_duration in serializable_timeline[current_stream]["comm"]:
+                for comp_start, comp_duration in serializable_timeline[next_stream]["comp"]:
+                    overlap_start = max(comm_start, comp_start)
+                    overlap_end = min(comm_start + comm_duration, comp_start + comp_duration)
+                    
+                    if overlap_end > overlap_start:
+                        overlap_duration += overlap_end - overlap_start
+                       
+        
+        # for stream1, data1 in serializable_timeline.items():
+        #     for stream2, data2 in serializable_timeline.items():
+        #         if stream1 != stream2:
+        #             logger.info(f"{stream1}, {stream2}")
+        #             for comm_start, comm_duration in data1["comm"]:
+        #                 for comp_start, comp_duration in data2["comp"]:
+        #                     overlap_start = max(comm_start, comp_start)
+        #                     overlap_end = min(comm_start + comm_duration, comp_start + comp_duration)
+        #                     if overlap_end > overlap_start:
+        #                         overlap_duration += overlap_end - overlap_start
+        
+        # Calculate total communication time
+        total_comm_time = 0
+        for stream, data in serializable_timeline.items():
+            logger.info(f"{stream}'s overlap")
+            if data["comm"]:
+                num_comm_events = len(data["comm"])
+                comm_duration = data["comm"][0][1]  # duration of first comm event
+                stream_comm_time = num_comm_events * comm_duration
+                total_comm_time += stream_comm_time
+        comm_time_idle = total_comm_time - overlap_duration
+        overlap_percentage = overlap_duration/total_comm_time 
+
+
+
+        # txt_file_path = "%s/%s_overlap.txt"%(overlafile)
+        # txt_file_path = "%s/%s_overlap.txt"%(filename,variant_name)
+        # txt_file_path = os.path.join(os.getcwd(), "/results/%s_overlap.txt"%(filename))
+        with open(overlap_file, 'w') as txt_file:
+            txt_file.write(f"Total overlap duration: {overlap_duration} units\n")
+            txt_file.write(f"Total comm duration: {total_comm_time} units\n")
+            txt_file.write(f"Total comm Idle duration: {comm_time_idle} units\n")
+            txt_file.write(f"Overlap Percentage: {overlap_percentage} units\n")
+        
+        print(f"Overlap duration written to {overlap_file}")
+     
+    

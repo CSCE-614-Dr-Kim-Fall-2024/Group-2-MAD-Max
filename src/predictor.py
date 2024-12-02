@@ -99,11 +99,12 @@ class vTrain():
         return result, breakdown
     
 
-    def show_graph(self):
+    def show_graph(self, plot_file, overlap_file):
         if self.graph is None:
             logger.error(f"there is no simulated execution graph")
         else:
-            self.graph.show_graph()
+            self.graph.show_graph(plot_file, overlap_file)
+
 
 
     def create_model(self):
