@@ -1,0 +1,4 @@
+Total overlap duration: 401765162.91845703 units
+Total comm duration: 1172065734.8632812 units
+Total comm Idle duration: 770300571.9448242 units
+Overlap Percentage: 0.34278381405401465 units
