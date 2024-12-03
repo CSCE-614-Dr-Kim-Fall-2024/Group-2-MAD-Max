@@ -15,7 +15,7 @@ Please focus your attention on the mad-max branch. The main branch is just a for
 - **profiler/**: Holds vTrain profiler to collect all CUDA traces between init_trace() and finish_trace().
 - **src/**: Includes Python scripts for running the configurations and models, producing graphs, and etc.
 - **trace/**: Contains trace files generated during simulation runs for further analysis.
-- **results/**: Includes output .txt files showing predicted iterations, computations of GPUs and communication. Also includes some graphs.
+- **results/**: Includes output .txt files showing from the configrations files showing predicted iterations, computations of GPUs and communication. Also includes some graphs.
 
 Additional files include:
 - **example.py**: A script showcasing how to execute the configurations.
@@ -50,9 +50,9 @@ To set up and run the project, follow these steps:
    singularity exec --nv --bind $(pwd):/workspace/vTrain2 vtrain.sif /bin/bash
    ```
 
-6. Run the code using this command:
+6. Run the code using this command. Small changes are needed in process_configs_parallel.py depending on the configuration files being run, these are: the folder the configuration files are in (there are many folders made), the base_variants and the config_variants depending on what you want to run:
    ```bash
-   python example.py -c config/<config_file>.json
+   python process_configs_parallel.py --results_dir=results
    ```
 
 Replace `<config_file>` with the desired configuration file name to test different setups.
